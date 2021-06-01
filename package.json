@@ -1,0 +1,42 @@
+{
+  "name": "bc-orders",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "npm run build:prod && npm run start:prod",
+    "build": "npm run build:prod",
+    "start:prod": "node dist/index.js",
+    "build:prod": "tsc",
+    "start:dev": "nodemon -L dist/index.js",
+    "build:dev": "tsc --watch --preserveWatchOutput",
+    "dev": "concurrently \"npm:build:dev\" \"npm:start:dev\"",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint src/** --quiet --fix"
+  },
+  "author": "Mitchell Lee",
+  "license": "ISC",
+  "dependencies": {
+    "@types/log-update": "^3.1.0",
+    "chalk": "^4.1.1",
+    "cli-spinners": "^2.6.0",
+    "csv": "^5.5.0",
+    "dotenv": "^10.0.0",
+    "log-update": "^4.0.0",
+    "progress": "^2.0.3",
+    "request": "^2.88.2"
+  },
+  "devDependencies": {
+    "@types/chalk": "^2.2.0",
+    "@types/concurrently": "^6.0.1",
+    "@types/progress": "^2.0.3",
+    "@types/request": "^2.48.5",
+    "@typescript-eslint/eslint-plugin": "^4.22.1",
+    "@typescript-eslint/parser": "^4.22.1",
+    "concurrently": "^6.0.2",
+    "eslint": "^7.26.0",
+    "nodemon": "^2.0.7",
+    "tslib": "^2.2.0",
+    "typescript": "^3.9.9"
+  }
+}
