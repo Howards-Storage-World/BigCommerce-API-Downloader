@@ -11,8 +11,8 @@
     "start:dev": "nodemon -L dist/index.js",
     "build:dev": "tsc --watch --preserveWatchOutput",
     "dev": "concurrently \"npm:build:dev\" \"npm:start:dev\"",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint src/** --quiet --fix"
+    "test": "npm run lint",
+    "lint": "eslint src/** --ext .js,.jsx,.ts,.tsx --fix"
   },
   "author": "Mitchell Lee",
   "license": "ISC",

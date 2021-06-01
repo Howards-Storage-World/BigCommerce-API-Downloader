@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-lines-per-function */
 import DotEnv from 'dotenv'; DotEnv.config();
-import ProgressBar from 'progress';
+// import ProgressBar from 'progress';
 import { performance }  from 'perf_hooks';
 import { getCustomerAddresses, getLines, getOrderCount, getOrders, getProduct, loadTestOrder } from "./lib/requests";
 import { Order, Line, Product, CustomerAddress, BigCommerceV3Wrapper } from "./lib/big_commerce_types";
