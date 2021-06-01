@@ -1,15 +1,16 @@
 import { dots } from 'cli-spinners';
 import LogUpdate from 'log-update';
 import { EventEmitter } from 'events';
-import { epochTimeToHuman } from '../lib/util'
+import { epochTimeToHuman } from './util'
 import defaultTheme, { Theme } from './theme';
 import logUpdate from 'log-update';
 
 export default class LoadingBar extends EventEmitter {
     // Internal State
     intervalID: number | undefined = undefined;
-    frame = 0;
-    isActive = false;
+    frame         = 0;
+    isActive      = false;
+    clearOnFinish = false;
     
     // User Settings
     theme: Theme = defaultTheme;
@@ -22,12 +23,13 @@ export default class LoadingBar extends EventEmitter {
     startTime: number | undefined;
     finishTime: number | undefined;
 
-    constructor(message: string, total: number, options?: { width?: number }) {
+    constructor(message: string, total: number, options?: { width?: number, clearOnFinish?: boolean }) {
         super();
         this.message = message;
-        this.total = total;
+        this.total   = total;
 
-        this.width = options?.width || this.width;
+        this.width         = options?.width         || this.width;
+        this.clearOnFinish = options?.clearOnFinish || this.clearOnFinish;
         this.render();
     }
 
@@ -41,20 +43,21 @@ export default class LoadingBar extends EventEmitter {
     
     start(): void {
         if (!this.isActive) {
-            this.isActive = true;
-            this.startTime = Date.now();
-            this.intervalID = setInterval(this.render.bind(this), dots.interval) as unknown as number;
+            this.isActive   = true;
+            this.startTime  = Date.now();
+            this.intervalID = <number> <unknown> setInterval(this.render.bind(this), dots.interval); // This is a TS hack cause I am both dumb and lazy. For some reason NodeJS.Timeout is not a number in the core TS bindings, but the value is just a number.
         }
     }
     
     stop(): void {
         if (this.isActive) {
-            this.isActive = false;
+            this.isActive   = false;
             this.finishTime = Date.now();
-            clearInterval(<undefined> this.intervalID); // This is a TS hack cause I am both dumb and lazy
+            clearInterval(this.intervalID);
             this.intervalID = undefined;
             this.render();
-            logUpdate.done();   
+
+            this.clearOnFinish ? logUpdate.clear() : logUpdate.done();
         }
     }
 
@@ -85,10 +88,10 @@ export default class LoadingBar extends EventEmitter {
         if (!this.startTime) return '';
         const elapsed = Date.now() - this.startTime;
         if (this.isActive) {
-            const rate = elapsed/ this.current;
+            const rate      = elapsed/ this.current;
             const remaining = this.total - this.current
-            const estimate = rate * remaining;
-            return this.theme.estimate(`${epochTimeToHuman(elapsed)}, estimated ${epochTimeToHuman(estimate)}`)
+            const estimate  = rate * remaining;
+            return this.theme.estimate(`${epochTimeToHuman(elapsed)} elapsed, ${epochTimeToHuman(estimate)} remaining`)
         } else {
             return this.theme.estimate(`${epochTimeToHuman(<number> this.finishTime - this.startTime)}`)
         }
@@ -100,8 +103,4 @@ export default class LoadingBar extends EventEmitter {
             this.frame = (this.frame + 1) % dots.frames.length;
         }
     }
-
-    // tick(count = 0): void {
-    //     console.log(tick)
-    // }
 }
