@@ -4,7 +4,7 @@
 import DotEnv from 'dotenv'; DotEnv.config();
 // import ProgressBar from 'progress';
 import { performance }  from 'perf_hooks';
-import { getCustomerAddresses, getLines, getOrderCount, getOrders, getProduct, loadTestOrder } from "./lib/requests";
+import { getAll, getCustomerAddresses, getLines, getOrderCount, getOrders, getProduct, loadTestOrder } from "./lib/requests";
 import { Order, Line, Product, CustomerAddress, BigCommerceV3Wrapper } from "./lib/big_commerce_types";
 import * as File from "./lib/file";
 import { Counter, sleep } from './lib/util';
@@ -23,7 +23,9 @@ async function main() {
     // await downloadLines();
     // downloadProducts();
     // await loadOrderIntoUATviaBoomi(); // Total Execution Time 2:43 (163 min) with 1132 request = ~8.6 secs/request
-    await test();
+    // await test();
+    const addresses = await getAll<CustomerAddress>("/customers/addresses", { startingPage: 3450, loadingMessage: "Downloading Customer Addresses" });
+    console.log(addresses.length);
 }
 
 // async function test() {

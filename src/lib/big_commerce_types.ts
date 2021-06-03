@@ -194,7 +194,7 @@ export type Pagination = {
     }
 }
 
-export type BigCommerceV3Wrapper<T> = {
-    data: T[]
+export type BigCommerceV3Wrapper<Content> = {
+    data: Content[]
     meta: QueryMeta
 }

@@ -4,6 +4,7 @@ data
 
 # Build
 /dist
+tsconfig.tsbuildinfo
 
 # Misc
 .DS_Store

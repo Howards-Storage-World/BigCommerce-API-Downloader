@@ -5,7 +5,8 @@ import { epochTimeToHuman } from './util'
 import defaultTheme, { Theme } from './theme';
 import logUpdate from 'log-update';
 
-export default class LoadingBar extends EventEmitter {
+// export default class LoadingBar extends EventEmitter {
+export default class LoadingBar {
     // Internal State
     intervalID: number | undefined = undefined;
     frame         = 0;
@@ -24,7 +25,7 @@ export default class LoadingBar extends EventEmitter {
     finishTime: number | undefined;
 
     constructor(message: string, total: number, options?: { width?: number, clearOnFinish?: boolean }) {
-        super();
+        // super();
         this.message = message;
         this.total   = total;
 
