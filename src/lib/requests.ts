@@ -1,5 +1,5 @@
 import { promisify } from 'util';
-import { Order, OrderCount, Line, Product, CustomerAddress, Pagination, BigCommerceV3Wrapper } from "../lib/big_commerce_types";
+import { Order, OrderCount, Line, Product, CustomerAddress, Pagination, BigCommerceV3Wrapper, Customer } from "../lib/big_commerce_types";
 import Request from 'request';
 import LoadingBar from '../loading_bar';
 const request = promisify(Request);
@@ -42,15 +42,21 @@ export async function getProduct(productID?: number): Promise<Product> {
     return product;
 }
 
+export async function getCustomer(page?: number): Promise<BigCommerceV3Wrapper<Customer>> {
+    const response = await request({ ...baseRequestOptions, 'url': baseRequestOptions.url + `/v3/customers?limit=100&page=${page || 0}`  });
+    const customers: BigCommerceV3Wrapper<Customer> = JSON.parse(response.body);
+    return customers;
+}
+
 export async function getCustomerAddresses(page?: number): Promise<BigCommerceV3Wrapper<CustomerAddress>> {
     const response = await request({ ...baseRequestOptions, 'url': baseRequestOptions.url + `/v3/customers/addresses?limit=100&page=${page || 0}`  });
     const addresses: BigCommerceV3Wrapper<CustomerAddress> = JSON.parse(response.body);
     return addresses;
 }
 
-export async function getNext<Content>(baseURI: string, meta: Pagination): Promise<BigCommerceV3Wrapper<Content>> {
+export async function getNext<Content>(baseURI: string, meta: Pagination, queryParameters?: string): Promise<BigCommerceV3Wrapper<Content>> {
     if (meta.current_page < meta.total_pages) {
-        const response = await request({ ...baseRequestOptions, 'url': baseURI + (meta.current_page + 1) });
+        const response = await request({ ...baseRequestOptions, 'url': baseURI + (meta.current_page + 1) + (queryParameters ? "&" + queryParameters : "") });
         const data: BigCommerceV3Wrapper<Content> = JSON.parse(response.body);
         return data;
     } else {
@@ -81,24 +87,30 @@ class LocalLoadingBar<Content> extends LoadingBar {
         this.total = response.meta.pagination.total_pages - this.startingPage; this.current = response.meta.pagination.current_page - this.startingPage;
     }
 }
-export async function getAll<Content>(resource: string, { startingPage = 0, showLoadingBar = true, loadingMessage = "Downloading Objects" } = { }): Promise<Content[]> {
+export async function getAll<Content>(resource: string, { queryParmeters = "", startingPage = 0, showLoadingBar = true, loadingMessage = "Downloading Objects" } = { }): Promise<Content[]> {
     const baseURI = `${baseRequestOptions.url}/v3${resource}?limit=100&page=`;
     const content: Content[] = [];
     const bar: LocalLoadingBar<Content> | undefined = showLoadingBar ? new LocalLoadingBar(loadingMessage, startingPage) : undefined;
     
     bar?.start();
-    let response: BigCommerceV3Wrapper<Content> = await getNext(baseURI, { current_page: startingPage, total: Infinity, count: Infinity, per_page: 100, total_pages: Infinity});
+    let response: BigCommerceV3Wrapper<Content> = await getNext(baseURI, { current_page: startingPage, total: Infinity, count: Infinity, per_page: 100, total_pages: Infinity}, queryParmeters);
     bar?.update(response);
     content.push(...response.data);
     
     while (response.meta.pagination.current_page < response.meta.pagination.total_pages) {
-        response = await getNext<Content>(baseURI, response.meta.pagination);
+        response = await getNext<Content>(baseURI, response.meta.pagination, queryParmeters);
         bar?.update(response);
         content.push(...response.data);
     }
     bar?.stop();
     
     return content;
+}
+
+export async function updateCustomers(data: (Partial<Customer> & { id: number })[]): Promise<BigCommerceV3Wrapper<Customer>> {
+    const resp = await request({ ...baseRequestOptions, 'url': baseRequestOptions.url + "/v3/customers", method: "PUT", body: JSON.stringify(data)  });
+    const customers: BigCommerceV3Wrapper<Customer> = JSON.parse(resp.body);
+    return customers;
 }
 
 // bar.start();

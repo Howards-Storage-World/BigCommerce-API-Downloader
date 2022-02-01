@@ -4,8 +4,8 @@
 import DotEnv from 'dotenv'; DotEnv.config();
 // import ProgressBar from 'progress';
 import { performance }  from 'perf_hooks';
-import { getAll, getCustomerAddresses, getLines, getOrderCount, getOrders, getProduct, loadTestOrder } from "./lib/requests";
-import { Order, Line, Product, CustomerAddress, BigCommerceV3Wrapper } from "./lib/big_commerce_types";
+import { getAll, getCustomer, getCustomerAddresses, getLines, getOrderCount, getOrders, getProduct, loadTestOrder, updateCustomers } from "./lib/requests";
+import { Order, Line, Product, CustomerAddress, BigCommerceV3Wrapper, Customer } from "./lib/big_commerce_types";
 import * as File from "./lib/file";
 import { Counter, sleep } from './lib/util';
 import LoadingBar from './loading_bar/index';
@@ -24,9 +24,36 @@ async function main() {
     // downloadProducts();
     // await loadOrderIntoUATviaBoomi(); // Total Execution Time 2:43 (163 min) with 1132 request = ~8.6 secs/request
     // await test();
-    const addresses = await getAll<CustomerAddress>("/customers/addresses", { startingPage: 3450, loadingMessage: "Downloading Customer Addresses" });
-    console.log(addresses.length);
+    // const addresses = await getAll<CustomerAddress>("/customers/addresses", { startingPage: 3450, loadingMessage: "Downloading Customer Addresses" });
+
+    // const customers = await getAll<Customer>("/customers", { startingPage: 0, loadingMessage: "Downloading Customers", queryParmeters: "include=addresses,storecredit,attributes,formfields" });
+    // await File.write<Customer[]>("customers", customers, 'json');
+    
+    const customers = await File.read<Customer[]>("customers", 'json');
+    console.log(customers.length)
+
+    const filter = (customer: Customer, idx: number) => {
+        const isRetailCustomer = customer.customer_group_id === 2;
+        
+        const memberNumberFormFields = customer.form_fields?.filter(form_field => form_field.name == "Member Number" && typeof(form_field.value) === "string" && form_field.value);
+        const hasMemberNumber = (memberNumberFormFields?.length ?? 0) > 0;
+
+        const joinRewardsProgramFormFields = customer.form_fields?.filter(form_field => form_field.name == "Join our Rewards Program" && typeof(form_field.value) === "object" && form_field.value[0] == "Yes, I want to be rewarded when I shop with Howards!");
+        const wantsToJoinRewardsProgram = (joinRewardsProgramFormFields?.length ?? 0) > 0;
+
+        return isRetailCustomer && hasMemberNumber && wantsToJoinRewardsProgram;
+    }
+    const damaged_accounts = customers.filter(filter);
+    console.log("Number of damanged accounts", damaged_accounts.length);
+
+    for (const customer of damaged_accounts) {
+        const updateData = { id: customer.id, customer_group_id: 1 };
+        const account = await updateCustomers([updateData]);
+        console.log(account)
+    }
 }
+
+
 
 // async function test() {
 //     try {

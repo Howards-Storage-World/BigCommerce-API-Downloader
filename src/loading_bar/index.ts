@@ -1,6 +1,6 @@
 import { dots } from 'cli-spinners';
 import LogUpdate from 'log-update';
-import { EventEmitter } from 'events';
+// import { EventEmitter } from 'events';
 import { epochTimeToHuman } from './util'
 import defaultTheme, { Theme } from './theme';
 import logUpdate from 'log-update';
@@ -73,7 +73,7 @@ export default class LoadingBar {
     progressBar(): string {
         const percentage = Math.max(0, Math.min(1, this.percentage));
         
-        const template = ` ${Math.round(percentage * 10000) / 100}%`.padEnd(this.width);
+        const template = ` ${(Math.round(percentage * 10000) / 100).toFixed(2)}%`.padEnd(this.width);
         
         let string = '';
         for (let i = 0; i < this.width; i++) {

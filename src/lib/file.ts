@@ -17,7 +17,7 @@ const CSV: CSVType  = {
 
 // const basePath = path.join("data", "early-july-2020");
 // const basePath = path.join("data", "late-april-2021");
-const basePath = path.join("data", "test");
+const basePath = path.join("data", "late-january-2022");
 
 export type FileType = "json" | "csv";
 

@@ -1,3 +1,39 @@
+export interface Customer extends DateStamped {
+    email: string
+    first_name: string
+    last_name: string
+    company: string
+    phone: string
+    registration_ip_address: string
+    notes: string
+    tax_exempt_category: string
+    customer_group_id: number
+    id: number
+    address_count: string
+    attribute_count: string
+    authentication: {
+        force_password_reset: boolean
+    }
+    addresses?: CustomerAddress[]
+    attributes?: CustomerAttribute[]
+    form_fields?: FormField[]
+    store_credit_amounts?: any[]
+    accepts_product_review_abandoned_cart_emails: boolean
+    channel_ids: number[]
+}
+
+interface CustomerAttribute extends DateStamped {
+    attribute_id: number
+    attribute_value: string
+    customer_id: number
+    id: number
+}
+
+interface DateStamped {
+    date_modified: string
+    date_created: string
+}
+
 export interface Order {
     id: number
     date_modified: string
@@ -136,7 +172,7 @@ export interface BillingAddress {
 
 export interface FormField {
     name: string
-    value: string
+    value: string | number | string[]
 }
 
 export interface AdditionalResource {
@@ -174,7 +210,7 @@ export interface CustomerAddress {
     country_code: string
     phone?: string
     address_type?: string
-    form_fields: (FormField & { customer_id: number}) []
+    form_fields: (FormField & ({ customer_id: number } | { address_id: number })) []
 }
 
 export type QueryMeta = {
